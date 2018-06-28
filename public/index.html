@@ -14,35 +14,49 @@
                 grid-row: 1 / 10;
                 grid-column: 1 / 1;
             }
+            b{
+                border-bottom: 3px solid tan;
+            }
             ul{
                 list-style-type: none;
                 padding-left: 10px;
+                padding-right: 10px;
             }
-            textarea{border:none;
+            textarea{
                 grid-column: 2 /6;
                 background-color: LemonChiffon;
                 color:black;
                 padding: 10px;
+                border: 1px solid tan;
+            }
+            input{
+                background-color: lemonchiffon;
             }
             button, input{
+                border: 1px solid tan;
                 padding: 5px;
                 margin: 2px;
-                background-color: tan;
                 color: black;
-                border: none;
                 border-radius: 2px;
+            }
+            h1{
+                font-size: 1.5em;
+                border-bottom: 3px solid indianred;
+                margin-top: 0;
+                padding-top: 0;
             }
             .api_link:hover{
                 cursor: pointer;
+                background-color: tan;
             }
         </style>
     </head>
     <body>
             <ul id='api_listing'></ul>
-            <button id='add_api'>Add API</button>
+            <button id='add_api' style='background-color: lightgreen;'>Add API</button>
             <input id='appname' placeholder='appname'>
             <input id='api' placeholder='api'>
-            <button id='del_api'>Remove API</button>
+            <button id='del_api' style='background-color: pink;'>Remove API</button>
             <textarea id='code' class='python'></textarea>
             <script>
     
@@ -64,6 +78,8 @@
                             var code = code[apiname];
                             $("#code").val(code);
                         }catch(error){  console.error('error occured'); }
+                        var app = '<h1>API listing</h1>';
+                        $('#api_listing').append($(app));
                         for (var key in data) {
                             if (data.hasOwnProperty(key)) {
                                 var val = data[key];
