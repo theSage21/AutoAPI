@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CLAP API</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <style>
+            body {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+                grid-template-rows: 1fr 10fr;
+            }
+            #api_listing{
+                grid-row: 1 / 10;
+                grid-column: 1 / 1;
+            }
+            ul{
+                list-style-type: none;
+                padding-left: 10px;
+            }
+            textarea{border:none;
+                grid-column: 2 /6;
+            }
+            button, input{
+                padding: 5px;
+                margin: 2px;
+                background-color: tan;
+                color: black;
+                border: none;
+                border-radius: 2px;
+            }
+        </style>
+    </head>
+    <body>
+            <ul id='api_listing'></ul>
+            <button id='add_api'>Add API</button>
+            <input id='appname' placeholder='appname'>
+            <input id='api' placeholder='api'>
+            <button id='del_api'>Remove API</button>
+            <textarea id='code'></textarea>
+            <script>
+                hljs.configure({useBR: true});
+    
+                $('textarea').each(function(i, block) {
+                    hljs.highlightBlock(block);
+                });
+                var root = 'http://localhost:8800';
+
+                function hitApi(endpoint, json, success_fn){
+                    $.ajax({url: root + endpoint, type: 'post',
+                            contentType: 'application/json',
+                            data: JSON.stringify(json),
+                            success: success_fn});
+                } // hit API
+                function refresh_listing(appname='', apiname=''){
+                    $("#api_listing").text('');
+                    $("#code").text('');
+                    hitApi('/api/list', {}, function (data){
+                        try{var code = data[appname];
+                            var code = code[apiname];
+                            $("#code").val(code);
+                        }catch(error){  console.error(error); }
+                        for (var key in data) {
+                            if (data.hasOwnProperty(key)) {
+                                var val = data[key];
+                                var app = "<li><b>"+key+"</b><ul>";
+                                for (var api in val) {
+                                        if (val.hasOwnProperty(api)) {
+                                            app += '<li>'+api+'</li>';
+                                        }
+                                }
+                                app += "</ul></li>";
+                                $('#api_listing').append($(app));
+                            }
+                        }
+                    });
+                }
+                $("#appname").change(function (){
+                    var app = $("#appname").val();
+                    console.log(app);
+                    refresh_listing(app, '');
+                });
+                $("#api").change(function (){
+                    refresh_listing($("#appname").val(), $("#api").val());
+                });
+                refresh_listing();
+                $("#add_api").click(function (){
+                    var app = $("#appname").val();
+                    var api = $("#api").val();
+                    var code = $("#code").val();
+                    var payload = {"app": app, "new_api": api, "code": code};
+                    console.log(payload);
+                    hitApi("/api/register", payload, function (data) {
+                        refresh_listing();
+                    });
+                });
+                $("#del_api").click(function (){
+                    var app = $("#appname").val();
+                    var api = $("#api").val();
+                    var payload = {"app": app, "new_api": api};
+                    console.log(payload);
+                    hitApi("/api/remove", payload, function (data) {
+                        refresh_listing();
+                    });
+                });
+            </script>
+    </body>
+</html>

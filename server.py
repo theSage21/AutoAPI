@@ -1,4 +1,14 @@
 api = []
+
+
+# ==== imports auth
+try:
+    from apps.auth import api as auth_api
+    api += [("auth", a) for a in auth_api]
+except Exception as e:
+    print("auth import had error: ", e)
+
+
 import bottle
 import yaml
 import os
@@ -48,7 +58,7 @@ def recycle():
                 pre += f'    from apps.{app} import api as {app}_api\n'
                 pre += f'    api += [("{app}", a) for a in {app}_api]\n'
                 pre += f'except Exception as e:\n'
-                pre += f'    print("{app} import had error: {e}")\n'
+                pre += f'    print("{app} import had error: ", e)\n'
         final_this_file = '\n'.join([pre.strip(), '\n', post.strip()])
         if this_file != final_this_file:  # Avoid infinite recursion
             with open('server.py', 'w') as fl2:
@@ -74,6 +84,26 @@ def register_a_new_api():
     if app not in __config:
         __config[app] = {}
     __config[app][new_api] = code
+    __save_config()
+    recycle()
+    return ''
+
+
+@wsgi.post('/api/list')
+def get_api_code():
+    return __config
+
+
+@wsgi.post('/api/remove')
+def remove_api():
+    jsn = bottle.request.json
+    app = jsn.get('app')
+    new_api = jsn.get('new_api')
+    if app is None or app not in __config:
+        abort(404, 'no such app')
+    if new_api is None or new_api not in __config[app]:
+        abort(404, 'no such api')
+    __config[app].pop(new_api)
     __save_config()
     recycle()
     return ''
