@@ -1,14 +1,6 @@
 api = []
 
 
-# ==== imports auth
-try:
-    from apps.auth import api as auth_api
-    api += [("auth", a) for a in auth_api]
-except Exception as e:
-    print("auth import had error: ", e)
-
-
 import bottle
 import yaml
 import os
