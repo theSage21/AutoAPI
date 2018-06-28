@@ -4,8 +4,6 @@
         <title>CLAP API</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
         <style>
             body {
                 display: grid;
@@ -22,6 +20,9 @@
             }
             textarea{border:none;
                 grid-column: 2 /6;
+                background-color: LemonChiffon;
+                color:black;
+                padding: 10px;
             }
             button, input{
                 padding: 5px;
@@ -31,6 +32,9 @@
                 border: none;
                 border-radius: 2px;
             }
+            .api_link:hover{
+                cursor: pointer;
+            }
         </style>
     </head>
     <body>
@@ -39,13 +43,9 @@
             <input id='appname' placeholder='appname'>
             <input id='api' placeholder='api'>
             <button id='del_api'>Remove API</button>
-            <textarea id='code'></textarea>
+            <textarea id='code' class='python'></textarea>
             <script>
-                hljs.configure({useBR: true});
     
-                $('textarea').each(function(i, block) {
-                    hljs.highlightBlock(block);
-                });
                 var root = 'http://localhost:8800';
 
                 function hitApi(endpoint, json, success_fn){
@@ -56,19 +56,24 @@
                 } // hit API
                 function refresh_listing(appname='', apiname=''){
                     $("#api_listing").text('');
-                    $("#code").text('');
+                    $("#code").val('');
+                    $("#api").val(apiname);
+                    $("#appname").val(appname);
                     hitApi('/api/list', {}, function (data){
                         try{var code = data[appname];
                             var code = code[apiname];
                             $("#code").val(code);
-                        }catch(error){  console.error(error); }
+                        }catch(error){  console.error('error occured'); }
                         for (var key in data) {
                             if (data.hasOwnProperty(key)) {
                                 var val = data[key];
                                 var app = "<li><b>"+key+"</b><ul>";
                                 for (var api in val) {
                                         if (val.hasOwnProperty(api)) {
-                                            app += '<li>'+api+'</li>';
+                                            app += '<li class="api_link" onclick="refresh_listing(';
+                                            app += "'" + key + "'";
+                                            app += ", '" + api + "')";
+                                            app += '">'+api+'</li>';
                                         }
                                 }
                                 app += "</ul></li>";
